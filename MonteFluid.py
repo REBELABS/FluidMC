@@ -2,16 +2,114 @@
 """
 Created on Mon Jun 25 10:31:37 2025
 
-@author: HomePC
+@author: REBELABS
 """
 import numpy as np
 from scipy import stats
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import pymc as pm
 import matplotlib.pyplot as plt
 from datetime import datetime
 
 # Set random seed for reproducibility
 np.random.seed(42)
+
+##Setup the variables
+#Porosity Ratio (Phil_r)
+alh_pr = np.array([0.7508,0.6868,0.5952])
+dlh_pr = np.array([0.0133,1.456,1.68])
+
+#Outlet Angle (Theta)
+theta = np.array([0,20,50,70,90])
+
+#ALH Volume Flux
+q_AB = np.array([0.0047,0.0071,0.0518,0.0506,0.0071])
+q_AC = np.array([0.0071,0.0071,0.0542,0.0495,0.0141])
+q_AD = np.array([0.0141,0.0153,0.0130,0.0683,0.0612])
+
+#DLH Volume Flux
+q_BA = np.array([0.1543,0.1095,0.0448,0.0247,0])
+q_CA = np.array([0.1543,0.1272,0.0730,0.0306,0])
+q_DA = np.array([0.1760,0.1398,0.0836,0.0836,0])
+
+#Creating a triplet for eaiser numerations
+#for samle AB
+data_AB = []
+for i in range(len(theta)):
+    entry = {'theta':theta[i],'phi_r':alh_pr[0],'q':q_AB[i]}
+    data_AB.append(entry)
+
+#Creating a triplet for samle AC
+data_AC = []
+for i in range(len(theta)):
+    entry = {'theta':theta[i],'phi_r':alh_pr[1],'q':q_AC[i]}
+    data_AC.append(entry)
+    
+#Creating a triplet for samle AD
+data_AD = []
+for i in range(len(theta)):
+    entry = {'theta':theta[i],'phi_r':alh_pr[2],'q':q_AD[i]}
+    data_AD.append(entry)
+
+##Get out the values and make numpy array again for fast computation and pymc demand
+#Get out the values for data_AB
+theta_AB = np.array([item['theta'] for item in data_AB])
+phi_r_AB = np.array([item['phi_r'] for item in data_AB])
+vq_AB = np.array([item['q'] for item in data_AB])
+
+#Get out the values for data_AC
+theta_AC = np.array([item['theta'] for item in data_AC])
+phi_r_AC = np.array([item['phi_r'] for item in data_AC])
+vq_AC = np.array([item['q'] for item in data_AC])
+
+#Get out the values for data_AD
+theta_AD = np.array([item['theta'] for item in data_AD])
+phi_r_AD = np.array([item['phi_r'] for item in data_AD])
+vq_AD = np.array([item['q'] for item in data_AD])
+
+##Normalize the values. Helps with weak piriors, improve geometric samler (NUT)
+##& numerical stability for fast convergence. #Min to Max normalization range (0 to 1)
+
+#Setting the global min and max phi_r to avoid division by zero
+phi_r_min = alh_pr.min()
+phi_r_max = alh_pr.max()
+
+#Sample AB
+theta_AB_norm = (theta_AB-theta_AB.min())/(theta_AB.max()-theta_AB.min())
+phi_r_AB_norm = (phi_r_AB-phi_r_min)/(phi_r_max-phi_r_min)
+
+#Sample AC
+theta_AC_norm = (theta_AC-theta_AC.min())/(theta_AC.max()-theta_AC.min())
+phi_r_AC_norm = (phi_r_AC-phi_r_min)/(phi_r_max-phi_r_min)
+
+#Sample AD
+theta_AD_norm = (theta_AD-theta_AD.min())/(theta_AD.max()-theta_AD.min())
+phi_r_AD_norm = (phi_r_AD-phi_r_min)/(phi_r_max-phi_r_min)
+
+#Concentate
+theta_all_alh = np.concatenate([theta_AB_norm,theta_AC_norm,theta_AD_norm])
+phi_r_all_alh = np.concatenate([phi_r_AB_norm,phi_r_AC_norm,phi_r_AD_norm])
+q_all_alh = np.concatenate([vq_AB,vq_AC,vq_AD])
+
+#Print to verify normalization
+#print(f'{theta_all_alh}')
+#print(f'{phi_r_all_alh}')
+#print(f'{q_all_alh}')
+
+with pm.Model() as cond_density_model_alh:
+    theta_data = pm.MutableData("theta", theta_all_alh)
+    phi_r_data = pm.MutableData("phi_r", phi_r_all_alh)
+    
+    
+    
+
+
+
+
+
+#PYMC
+with pm.Model() as gp_model:
+    
+
 
 # Parameters from literature review
 def vs_af_model(theta):
