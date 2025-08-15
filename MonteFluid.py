@@ -96,11 +96,24 @@ q_all_alh = np.concatenate([vq_AB,vq_AC,vq_AD])
 #print(f'{q_all_alh}')
 
 with pm.Model() as cond_density_model_alh:
+    #Declare the inputs
     theta_data = pm.MutableData("theta", theta_all_alh)
     phi_r_data = pm.MutableData("phi_r", phi_r_all_alh)
+    q_data = pm.MutableData("q", q_all_alh)
     
+    #Pirior of the baseline q, i.e q when theta and porosity ratio are nuetral or close to zero
+    # TruncatedNormal: mu=0.0001, sigma=0.001, lower=0
+    baseflux = pm.TruncatedNormal("baseflux", mu =0.0001, sigma = 0.001, lower =0)
     
+    #Pirior for the outlet angle. This is applied on the regression weights not the actual values
+    #it allows for the mixed relationship with q. Model learn from the data whether increasing theta or phi_r contributes + or - to q
+    w_theta = pm.Normal("w_theta", mu=0, sigma=1)
+
+    #Pirior for the porosity ratio.
+    w_phi = pm.Normal("w_phi", mu=0, sigma=1)
     
+    #Std around the predicted q or messiness of the q
+    sigma_q = pm.Half
 
 
 
