@@ -57,6 +57,9 @@ with pm.Model() as cond_density_model_alh:
         trace_alh, var_names=["q_likelihood"], return_inferencedata=True, random_seed=42
     )
 
+#Graph of the model
+pm.model_to_graphviz(cond_density_model_alh)
+
 # Plot posterior predictive
 ppc = post_pred_alh.posterior_predictive["q_likelihood"].values.flatten()
 plt.figure(figsize=(14, 10))
