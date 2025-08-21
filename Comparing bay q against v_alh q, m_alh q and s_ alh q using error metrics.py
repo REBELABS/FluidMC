@@ -86,4 +86,5 @@ ax2.legend()
 
 # Show the plot
 fig.tight_layout()
+plt.savefig('Error Metrics.png', dpi=300, bbox_inches='tight')
 plt.show()
