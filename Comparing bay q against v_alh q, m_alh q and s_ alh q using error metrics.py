@@ -10,6 +10,20 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import matplotlib.pyplot as plt
 
+#raw observed lab data
+theta = np.array([0,20,50,70,90])
+q_AB = np.array([0.0047,0.0071,0.0518,0.0506,0.0071])
+q_AC = np.array([0.0071,0.0071,0.0542,0.0495,0.0141])
+q_AD = np.array([0.0141,0.0153,0.0130,0.0683,0.0612])
+
+#Concentate
+theta_all=np.tile(theta,3)
+q_all=np.concat([q_AB,q_AC,q_AD])
+
+#Print to check
+#print(theta_all)
+#print(q_all)
+
 # Load the CSV file into a DataFrame
 df = pd.read_csv('Mean Comparison.csv')
 print(df.head(1))
@@ -60,6 +74,7 @@ ax1.scatter(df['Theta'],df['Bay (q)'],s=2,alpha=0.5,label='Bayesian q',color='re
 ax1.plot(df['Theta'],df['v_alh (q)'],label='VSM q',color='blue')
 ax1.plot(df['Theta'],df['m_alh (q)'],label='Matrix q',color='orange')
 ax1.plot(df['Theta'],df['s_alh (q)'],label='OLS q',color='green')
+ax1.scatter(theta_all,q_all,label='Observed q',s=3,alpha=0.55,color='black')
 
 ax1.set_title('Predicted q vs Θ')
 ax1.set_xlabel('Θ')
